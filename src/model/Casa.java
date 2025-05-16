@@ -37,7 +37,7 @@ class Casa {
 	}
 	
 	public boolean temPecaDaMesmaCor(Cor cor) {
-		return peca != null && peca.getCorPeca() == cor;	
+		return peca != null && peca.getCor() == cor;	
 	}
 	
 	@Override

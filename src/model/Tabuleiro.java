@@ -11,12 +11,25 @@ class Tabuleiro {
             }
         }
     }
-
+    
+    public Casa getCasa(int linha, int coluna) {
+    	return casas[linha][coluna];
+    }
+    
+    public Peca getPeca(int linha, int coluna) {
+    	return casas[linha][coluna].getPeca();
+    }
+ 
+    public void colocarPeca(Peca peca, int linha, int coluna) {
+    	casas[linha][coluna].setPeca(peca);
+    	peca.setPosicao(linha,coluna);
+    }
+    
+    public void removerPeca( int linha, int coluna) {
+    	casas[linha][coluna].removePeca();
+    }
+    
     public boolean estaDentro(int linha, int coluna) {
         return linha >= 0 && linha < 8 && coluna >= 0 && coluna < 8;
-    }
-
-    public Peca getPeca(int linha, int coluna) {
-        return casas[linha][coluna].getPeca();
     }
 }
