@@ -20,30 +20,31 @@ public class TabuleiroTest {
 
     @Test(timeout = 2000)
     public void deveRetornarNuloQuandoNaoHaPeca() {
-        Peca peca = tabuleiro.getPeca(4, 4);
-        assertNull("Era para ser nulo quando não há peça", peca);
+        assertNull("Era para ser nulo quando não há peça", tabuleiro.getPeca(4, 4));
     }
 
     @Test(timeout = 2000)
     public void deveColocarERecuperarPecaCorretamente() {
-        Peao peao = new Peao(Cor.BRANCO);
-        tabuleiro.colocarPeca(peao, 2, 2);
-        Peca pecaRecuperada = tabuleiro.getPeca(2, 2);
-        assertEquals("Era para recuperar a peça colocada", peao, pecaRecuperada);
+        Peao peao = new Peao(Cor.BRANCO, 2, 2);
+        tabuleiro.colocarPeca(peao, 2, 2);      
+
+        Peca recuperada = tabuleiro.getPeca(2, 2);
+        assertEquals("Era para recuperar a mesma peça que foi colocada", peao, recuperada);
     }
 
     @Test(timeout = 2000)
     public void deveRemoverPecaCorretamente() {
-        Peao peao = new Peao(Cor.BRANCO);
+        Peao peao = new Peao(Cor.BRANCO, 3, 3);
         tabuleiro.colocarPeca(peao, 3, 3);
         tabuleiro.removerPeca(3, 3);
+
         assertNull("Era para a posição estar vazia após remover a peça", tabuleiro.getPeca(3, 3));
     }
 
     @Test(timeout = 2000)
     public void deveVerificarSePosicaoEstaDentroDosLimites() {
-        assertTrue("Era para estar dentro do tabuleiro", tabuleiro.estaDentro(0, 0));
-        assertFalse("Não era para estar dentro do tabuleiro", tabuleiro.estaDentro(-1, 0));
-        assertFalse("Não era para estar dentro do tabuleiro", tabuleiro.estaDentro(8, 8));
+        assertTrue("Deveria reconhecer a posição (0, 0) como válida", tabuleiro.estaDentro(0, 0));
+        assertFalse("Não deveria aceitar posição (-1, 0)", tabuleiro.estaDentro(-1, 0));
+        assertFalse("Não deveria aceitar posição (8, 8)", tabuleiro.estaDentro(8, 8));
     }
 }
