@@ -5,9 +5,11 @@ import java.util.List;
 
 public class Jogo {
     private static Jogo instancia;
+
     private Tabuleiro tabuleiro;
     private Peca pecaSelecionada;
     private Cor jogadorAtual = Cor.BRANCO;
+
     private List<Peca> capturadasBrancas = new ArrayList<>();
     private List<Peca> capturadasPretas = new ArrayList<>();
 
@@ -50,7 +52,6 @@ public class Jogo {
 
         List<Posicao> movimentos = pecaSelecionada.getMovimentosPossiveis(tabuleiro);
         Posicao destino = new Posicao(linha, coluna);
-
         if (movimentos.contains(destino)) {
             Peca alvo = tabuleiro.getPeca(linha, coluna);
             if (alvo != null) {
@@ -69,6 +70,38 @@ public class Jogo {
 
         pecaSelecionada = null;
     }
+    
+    public boolean estaEmXeque(Cor cor) {
+        Posicao posRei = localizarRei(cor);
+
+        if (posRei == null) return false; 
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Peca peca = tabuleiro.getPeca(i, j);
+                if (peca != null && peca.getCor() != cor) {
+                    List<Posicao> movimentos = peca.getMovimentosPossiveis(tabuleiro);
+                    if (movimentos.contains(posRei)) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+    
+    private Posicao localizarRei(Cor cor) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Peca peca = tabuleiro.getPeca(i, j);
+                if (peca instanceof Rei && peca.getCor() == cor) {
+                    return new Posicao(i, j);
+                }
+            }
+        }
+        return null;
+    }
 
     public void imprimirTabuleiro() {
         for (int i = 0; i < 8; i++) {
@@ -79,7 +112,7 @@ public class Jogo {
             }
             System.out.println();
         }
-        System.out.println("  a b c d e f g h");
+        System.out.println("   a  b  c  d  e  f  g  h");
 
         System.out.print("Capturadas Brancas: ");
         for (Peca p : capturadasBrancas) System.out.print(p + " ");
@@ -90,6 +123,10 @@ public class Jogo {
         System.out.println();
 
         System.out.println("Vez de: " + (jogadorAtual == Cor.BRANCO ? "BRANCO" : "PRETO"));
+        
+        if (estaEmXeque(jogadorAtual)) {
+            System.out.println("XEQUE no jogador " + jogadorAtual);
+        }
     }
 
     private void inicializarPecas() {
@@ -101,7 +138,6 @@ public class Jogo {
         tabuleiro.colocarPeca(new Bispo(Cor.PRETO, 0, 5), 0, 5);
         tabuleiro.colocarPeca(new Cavalo(Cor.PRETO, 0, 6), 0, 6);
         tabuleiro.colocarPeca(new Torre(Cor.PRETO, 0, 7), 0, 7);
-
         for (int j = 0; j < 8; j++) {
             tabuleiro.colocarPeca(new Peao(Cor.PRETO, 1, j), 1, j);
         }
@@ -109,7 +145,6 @@ public class Jogo {
         for (int j = 0; j < 8; j++) {
             tabuleiro.colocarPeca(new Peao(Cor.BRANCO, 6, j), 6, j);
         }
-
         tabuleiro.colocarPeca(new Torre(Cor.BRANCO, 7, 0), 7, 0);
         tabuleiro.colocarPeca(new Cavalo(Cor.BRANCO, 7, 1), 7, 1);
         tabuleiro.colocarPeca(new Bispo(Cor.BRANCO, 7, 2), 7, 2);

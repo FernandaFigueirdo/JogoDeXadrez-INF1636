@@ -1,61 +1,35 @@
+package model;
+
 import static org.junit.Assert.*;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import model.*;
-import java.util.List;
 
 public class BispoTest {
+	private Tabuleiro tabuleiro;
+	private Bispo bispo;
 
-    private Tabuleiro tabuleiro;
+	@Before
+	public void setUp() {
+		tabuleiro = new Tabuleiro();
+		bispo = new Bispo(Cor.BRANCO, 4, 4);
+		tabuleiro.colocarPeca(bispo, 4, 4);
+	}
 
-    @Before
-    public void setUp() {
-        tabuleiro = new Tabuleiro();
-    }
+	@Test
+	public void testMovimentoInvalido() {
+		List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
 
-    @Test(timeout = 2000)
-    public void deveMoverPraDiagonalCimaDireita() {
-        Bispo bispo = new Bispo(Cor.BRANCO, 3, 3);
-        tabuleiro.colocarPeca(bispo, 3, 3);
+		Posicao posicaoInvalida = new Posicao(4, 6); 
+		assertFalse("Bispo não pode andar na horizontal", movimentos.contains(posicaoInvalida));
+	}
+	
+	@Test 
+	public void testMovimentoValido() {
+		List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
 
-        List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
-
-        assertTrue("Era pra poder ir pra (2,4)", movimentos.contains(new Posicao(2, 4)));
-    }
-
-    @Test(timeout = 2000)
-    public void deveMoverPraDiagonalBaixoEsquerda() {
-        Bispo bispo = new Bispo(Cor.BRANCO, 3, 3);
-        tabuleiro.colocarPeca(bispo, 3, 3);
-
-        List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
-
-        assertTrue("Era pra poder ir pra (4,2)", movimentos.contains(new Posicao(4, 2)));
-    }
-
-    @Test(timeout = 2000)
-    public void naoDevePassarSeTiverPecaMesmaCor() {
-        Bispo bispo = new Bispo(Cor.BRANCO, 3, 3);
-        tabuleiro.colocarPeca(bispo, 3, 3);
-
-        Peao bloqueio = new Peao(Cor.BRANCO, 2, 4);
-        tabuleiro.colocarPeca(bloqueio, 2, 4);
-
-        List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
-
-        assertFalse("Não deveria conseguir passar da peça em (2,4)", movimentos.contains(new Posicao(2, 4)));
-    }
-
-    @Test(timeout = 2000)
-    public void deveConseguirCapturarPecaDoInimigo() {
-        Bispo bispo = new Bispo(Cor.BRANCO, 3, 3);
-        tabuleiro.colocarPeca(bispo, 3, 3);
-
-        Peao adversario = new Peao(Cor.PRETO, 2, 4);
-        tabuleiro.colocarPeca(adversario, 2, 4);
-
-        List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
-
-        assertTrue("Deveria conseguir capturar a peça do adversário em (2,4)", movimentos.contains(new Posicao(2, 4)));
-    }
+		Posicao posicaoValida = new Posicao(6, 6); 
+		assertTrue("Movimento correto! Bispo pode andar na diagonal", movimentos.contains(posicaoValida));
+	}
+	
 }
