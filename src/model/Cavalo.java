@@ -4,41 +4,51 @@ import java.util.ArrayList;
 import java.util.List;
 
 class Cavalo extends Peca {
+
     public Cavalo(Cor cor, int linha, int coluna) {
         super(cor, linha, coluna);
     }
-    
+
     @Override
     public List<Posicao> getMovimentosPossiveis(Tabuleiro tabuleiro) {
-    List<Posicao> movimentos = new ArrayList<>();
+        List<Posicao> movimentos = new ArrayList<>();
 
-    int[][] deslocamentos = {
-        {-2, -1}, {-2, +1},
-        {-1, -2}, {-1, +2},
-        {+1, -2}, {+1, +2},
-        {+2, -1}, {+2, +1}
-    };
-    
-    for(int[] desloc : deslocamentos) {
-    	int novaLinha = getLinha() + desloc[0];
-    	int novaColuna = getColuna() + desloc[1];
-    	   
-    	
-    	if (tabuleiro.estaDentro(novaLinha, novaColuna)) {
-               Peca destino = tabuleiro.getPeca(novaLinha, novaColuna);
 
-               if (destino == null || outraCor(destino)) {
-                   movimentos.add(new Posicao(novaLinha, novaColuna));
-               }
-           }
+        adicionarMovimento(tabuleiro, movimentos, getLinha() - 2, getColuna() - 1);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() - 2, getColuna() + 1);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() - 1, getColuna() - 2);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() - 1, getColuna() + 2);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() + 1, getColuna() - 2);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() + 1, getColuna() + 2);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() + 2, getColuna() - 1);
+
+        adicionarMovimento(tabuleiro, movimentos, getLinha() + 2, getColuna() + 1);
+
+        return movimentos;
     }
-    
-    return movimentos;
+
+    private void adicionarMovimento(Tabuleiro tabuleiro, List<Posicao> movimentos, int linha, int coluna) {
+        if (tabuleiro.estaDentro(linha, coluna)) {
+            Peca pecaDestino = tabuleiro.getPeca(linha, coluna);
+
+            if (pecaDestino == null || outraCor(pecaDestino)) {
+                movimentos.add(new Posicao(linha, coluna));
+            }
+        }
     }
-    
+
     @Override
     public String toString() {
-        return getCor() == Cor.BRANCO ? "CB" : "CP";
+        if (getCor() == Cor.BRANCO) {
+            return "CB";
+        } else {
+            return "CP";
+        }
     }
-    
 }

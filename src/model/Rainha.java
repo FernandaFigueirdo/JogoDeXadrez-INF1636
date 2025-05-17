@@ -7,49 +7,142 @@ class Rainha extends Peca {
     public Rainha(Cor cor, int linha, int coluna) {
         super(cor, linha, coluna);
     }
-    
+
     @Override
     public List<Posicao> getMovimentosPossiveis(Tabuleiro tabuleiro) {
-    List<Posicao> movimentos = new ArrayList<>();
+        List<Posicao> movimentos = new ArrayList<>();
 
-    int[][] deslocamentos = {
-    		 {-1, +1}, 
-    		 {+1, -1},
-    		 {-1, -1}, 
-    		 {+1, +1},
-    		 {+1, 0},
-    		 {0, +1},
-    		 {-1, 0},
-    		 {0, -1}	 
-    };
-    
-    for(int[] desloc : deslocamentos) {
-    	int novaLinha = getLinha() + desloc[0];
-    	int novaColuna = getColuna() + desloc[1];
-    	   
-    	
-    	while (tabuleiro.estaDentro(novaLinha, novaColuna)) {
-               Peca destino = tabuleiro.getPeca(novaLinha, novaColuna);
+        int linha, coluna;
 
-               if (destino == null) {
-                   movimentos.add(new Posicao(novaLinha, novaColuna));
-               } else {
-            	   if (outraCor(destino)) {
-                       movimentos.add(new Posicao(novaLinha, novaColuna));
-                   }
-                   break;
-               }
-               novaLinha += desloc[0];
-               novaColuna += desloc[1];
-         }
+        linha = getLinha() - 1;
+        coluna = getColuna();
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha--;
+        }
+
+        linha = getLinha() + 1;
+        coluna = getColuna();
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha++;
+        }
+
+        linha = getLinha();
+        coluna = getColuna() - 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            coluna--;
+        }
+
+        linha = getLinha();
+        coluna = getColuna() + 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            coluna++;
+        }
+
+        linha = getLinha() - 1;
+        coluna = getColuna() - 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha--;
+            coluna--;
+        }
+
+        linha = getLinha() - 1;
+        coluna = getColuna() + 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha--;
+            coluna++;
+        }
+
+        linha = getLinha() + 1;
+        coluna = getColuna() - 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha++;
+            coluna--;
+        }
+
+        linha = getLinha() + 1;
+        coluna = getColuna() + 1;
+        while (tabuleiro.estaDentro(linha, coluna)) {
+            Peca destino = tabuleiro.getPeca(linha, coluna);
+            if (destino == null) {
+                movimentos.add(new Posicao(linha, coluna));
+            } else {
+                if (outraCor(destino)) {
+                    movimentos.add(new Posicao(linha, coluna));
+                }
+                break;
+            }
+            linha++;
+            coluna++;
+        }
+
+        return movimentos;
     }
-    
-    return movimentos;
-    }
-    
+
     @Override
     public String toString() {
         return getCor() == Cor.BRANCO ? "RB" : "RP";
     }
-    
 }

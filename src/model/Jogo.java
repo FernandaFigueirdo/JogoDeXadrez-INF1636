@@ -5,11 +5,9 @@ import java.util.List;
 
 public class Jogo {
     private static Jogo instancia;
-
     private Tabuleiro tabuleiro;
     private Peca pecaSelecionada;
     private Cor jogadorAtual = Cor.BRANCO;
-
     private List<Peca> capturadasBrancas = new ArrayList<>();
     private List<Peca> capturadasPretas = new ArrayList<>();
 
@@ -103,6 +101,7 @@ public class Jogo {
         tabuleiro.colocarPeca(new Bispo(Cor.PRETO, 0, 5), 0, 5);
         tabuleiro.colocarPeca(new Cavalo(Cor.PRETO, 0, 6), 0, 6);
         tabuleiro.colocarPeca(new Torre(Cor.PRETO, 0, 7), 0, 7);
+
         for (int j = 0; j < 8; j++) {
             tabuleiro.colocarPeca(new Peao(Cor.PRETO, 1, j), 1, j);
         }
@@ -110,6 +109,7 @@ public class Jogo {
         for (int j = 0; j < 8; j++) {
             tabuleiro.colocarPeca(new Peao(Cor.BRANCO, 6, j), 6, j);
         }
+
         tabuleiro.colocarPeca(new Torre(Cor.BRANCO, 7, 0), 7, 0);
         tabuleiro.colocarPeca(new Cavalo(Cor.BRANCO, 7, 1), 7, 1);
         tabuleiro.colocarPeca(new Bispo(Cor.BRANCO, 7, 2), 7, 2);
