@@ -1,6 +1,7 @@
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import model.*;
 
 public class TabuleiroTest {
 
@@ -12,14 +13,37 @@ public class TabuleiroTest {
     }
 
     @Test(timeout = 2000)
-    public void deveRetornarNuloParaPosicaoVazia() {
-        assertNull("Era para ser nulo na posição vazia", tabuleiro.getPeca(4, 4));
+    public void deveRetornarCasaNaoNula() {
+        Casa casa = tabuleiro.getCasa(4, 4);
+        assertNotNull("Era para retornar uma casa existente", casa);
     }
 
     @Test(timeout = 2000)
-    public void deveColocarEPegarPecaCorretamente() {
-        Peca peca = new Peao(Cor.BRANCO);
-        tabuleiro.setPeca(2, 2, peca);
-        assertEquals("Era para recuperar a peça colocada", peca, tabuleiro.getPeca(2, 2));
+    public void deveRetornarNuloQuandoNaoHaPeca() {
+        Peca peca = tabuleiro.getPeca(4, 4);
+        assertNull("Era para ser nulo quando não há peça", peca);
+    }
+
+    @Test(timeout = 2000)
+    public void deveColocarERecuperarPecaCorretamente() {
+        Peao peao = new Peao(Cor.BRANCO);
+        tabuleiro.colocarPeca(peao, 2, 2);
+        Peca pecaRecuperada = tabuleiro.getPeca(2, 2);
+        assertEquals("Era para recuperar a peça colocada", peao, pecaRecuperada);
+    }
+
+    @Test(timeout = 2000)
+    public void deveRemoverPecaCorretamente() {
+        Peao peao = new Peao(Cor.BRANCO);
+        tabuleiro.colocarPeca(peao, 3, 3);
+        tabuleiro.removerPeca(3, 3);
+        assertNull("Era para a posição estar vazia após remover a peça", tabuleiro.getPeca(3, 3));
+    }
+
+    @Test(timeout = 2000)
+    public void deveVerificarSePosicaoEstaDentroDosLimites() {
+        assertTrue("Era para estar dentro do tabuleiro", tabuleiro.estaDentro(0, 0));
+        assertFalse("Não era para estar dentro do tabuleiro", tabuleiro.estaDentro(-1, 0));
+        assertFalse("Não era para estar dentro do tabuleiro", tabuleiro.estaDentro(8, 8));
     }
 }
