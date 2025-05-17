@@ -42,6 +42,6 @@ class Casa {
 	
 	@Override
     public String toString() {
-        return temPeca() ? peca.toString() : "-";
+        return temPeca() ? peca.toString() : "--";
     }
 }
