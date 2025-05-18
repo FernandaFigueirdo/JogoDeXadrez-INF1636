@@ -3,8 +3,8 @@ package model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Jogo {
-    private static Jogo instancia;
+public class JogoAPI {
+    private static JogoAPI instancia;
 
     private Tabuleiro tabuleiro;
     private Peca pecaSelecionada;
@@ -13,14 +13,14 @@ public class Jogo {
     private List<Peca> capturadasBrancas = new ArrayList<>();
     private List<Peca> capturadasPretas = new ArrayList<>();
 
-    private Jogo() {
+    private JogoAPI() {
         tabuleiro = new Tabuleiro();
         inicializarPecas();
     }
 
-    public static Jogo getInstancia() {
+    public static JogoAPI getInstancia() {
         if (instancia == null) {
-            instancia = new Jogo();
+            instancia = new JogoAPI();
         }
         return instancia;
     }
@@ -37,18 +37,20 @@ public class Jogo {
         jogadorAtual = (jogadorAtual == Cor.BRANCO) ? Cor.PRETO : Cor.BRANCO;
     }
 
-    public void selecionaPeca(int linha, int coluna) {
+    public boolean selecionaPeca(int linha, int coluna) {
         Peca peca = tabuleiro.getPeca(linha, coluna);
         if (peca != null && peca.getCor() == jogadorAtual) {
             pecaSelecionada = peca;
+            return true;
         } else {
             System.out.println("Peça inválida ou não é sua vez!");
             pecaSelecionada = null;
+            return false;
         }
     }
 
-    public void selecionaCasa(int linha, int coluna) {
-        if (pecaSelecionada == null) return;
+    public boolean selecionaCasa(int linha, int coluna) {
+        if (pecaSelecionada == null) return false;
 
         List<Posicao> movimentos = pecaSelecionada.getMovimentosPossiveis(tabuleiro);
         Posicao destino = new Posicao(linha, coluna);
@@ -64,11 +66,12 @@ public class Jogo {
             tabuleiro.removerPeca(pecaSelecionada.getLinha(), pecaSelecionada.getColuna());
             tabuleiro.colocarPeca(pecaSelecionada, linha, coluna);
             alternarJogador();
-        } else {
-            System.out.println("Movimento inválido!");
-        }
+            pecaSelecionada = null;
+            return true;
+        } 
 
         pecaSelecionada = null;
+        return false;
     }
     
     public boolean estaEmXeque(Cor cor) {

@@ -1,6 +1,6 @@
 package model;
 
-public class Posicao {
+class Posicao {
 	public final int linha;
 	public final int coluna;
 	
@@ -15,6 +15,7 @@ public class Posicao {
         Posicao outra = (Posicao) obj;
         return this.linha == outra.linha && this.coluna == outra.coluna;
     }
+
 
     @Override
     public int hashCode() {
