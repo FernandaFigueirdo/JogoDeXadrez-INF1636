@@ -12,26 +12,29 @@ public class BispoTest {
 	
 	/**
 	 * Inicializa o tabuleiro e posiciona um bispo branco na casa central (4,4),
-	 * antes de cada teste.
+	 * Isso permite testar seus movimentos a partir de uma posição livre.
 	 */
 	@Before
 	public void setUp() {
 		tabuleiro = new Tabuleiro();
 		bispo = new Bispo(Cor.BRANCO, 4, 4);
-		tabuleiro.colocarPeca(bispo, 4, 4);
+		tabuleiro.colocaPeca(bispo, 4, 4);
 	}
 
 	/**
-	 * Testa se o bispo não possui movimento horizontal (o que é inválido para essa peça).
-	 * Espera-se que a posição (4,6) ,duas colunas à direita e mesma linha,
+	 * Testa se o bispo não possui movimento horizontal, vertical e em L (o que é inválido para essa peça).
+	 * Espera-se que a posição (4,6),(6, 4),(6, 5),
 	 * não esteja entre os movimentos possíveis.
 	 */
 	@Test
 	public void testMovimentoInvalido() {
 		List<Posicao> movimentos = bispo.getMovimentosPossiveis(tabuleiro);
+		
+	    assertFalse("Bispo não pode andar na horizontal", movimentos.contains(new Posicao(4, 6)));
 
-		Posicao posicaoInvalida = new Posicao(4, 6); 
-		assertFalse("Bispo não pode andar na horizontal", movimentos.contains(posicaoInvalida));
+	    assertFalse("Bispo não pode andar na vertical", movimentos.contains(new Posicao(6, 4)));
+
+	    assertFalse("Bispo não pode andar em L como o cavalo", movimentos.contains(new Posicao(6, 5)));
 	}
 	
 	/**

@@ -20,7 +20,7 @@ public class JogoTest {
 
         for (int i = 0; i < 8; i++)
             for (int j = 0; j < 8; j++)
-                tabuleiro.removerPeca(i, j);
+                tabuleiro.removePeca(i, j);
     }
 
     /**
@@ -31,10 +31,10 @@ public class JogoTest {
     @Test
     public void testXequeNormal() {
         Rei reiBranco = new Rei(Cor.BRANCO, 4, 4);
-        tabuleiro.colocarPeca(reiBranco, 4, 4);
+        tabuleiro.colocaPeca(reiBranco, 4, 4);
 
         Torre torrePreta = new Torre(Cor.PRETO, 0, 4);
-        tabuleiro.colocarPeca(torrePreta, 0, 4);
+        tabuleiro.colocaPeca(torrePreta, 0, 4);
 
         assertTrue("O rei branco está em xeque", jogo.estaEmXeque(Cor.BRANCO));
     }
@@ -48,17 +48,17 @@ public class JogoTest {
     @Test
     public void testXequeDescoberto() {
         Rei reiBranco = new Rei(Cor.BRANCO, 4, 4);
-        tabuleiro.colocarPeca(reiBranco, 4, 4);
+        tabuleiro.colocaPeca(reiBranco, 4, 4);
 
         Torre torrePreta = new Torre(Cor.PRETO, 0, 4);
-        tabuleiro.colocarPeca(torrePreta, 0, 4);
+        tabuleiro.colocaPeca(torrePreta, 0, 4);
 
         Peao peaoBranco = new Peao(Cor.BRANCO, 2, 4);
-        tabuleiro.colocarPeca(peaoBranco, 2, 4);
+        tabuleiro.colocaPeca(peaoBranco, 2, 4);
 
         assertFalse("Ainda não está em xeque", jogo.estaEmXeque(Cor.BRANCO));
 
-        tabuleiro.removerPeca(2, 4);
+        tabuleiro.removePeca(2, 4);
 
         assertTrue("Agora está em xeque descoberto", jogo.estaEmXeque(Cor.BRANCO));
     }

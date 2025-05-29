@@ -11,26 +11,30 @@ public class CavaloTest {
 
     /**
      * Posiciona um cavalo branco na casa central (4,4) antes de cada teste,
-     * garantindo um ambiente controlado para verificar seus movimentos possíveis.
+     * Isso permite testar seus movimentos a partir de uma posição livre.
      */
     @Before
     public void setUp() {
         tabuleiro = new Tabuleiro();
         cavalo = new Cavalo(Cor.BRANCO, 4, 4);
-        tabuleiro.colocarPeca(cavalo, 4, 4);
+        tabuleiro.colocaPeca(cavalo, 4, 4);
     }
 
     /**
      * Testa se o cavalo não pode se mover em uma direção inválida.
-     * O cavalo se movimenta em L então a posição (5,5), que é uma diagonal,
+     * O cavalo se movimenta em L então a posição (5,5),(3, 4),(4, 3),
      * não deve estar presente na lista de movimentos possíveis.
      */
     @Test
     public void testMovimentoInvalido() {
         List<Posicao> movimentos = cavalo.getMovimentosPossiveis(tabuleiro);
 
-        Posicao posicaoInvalida = new Posicao(5, 5); 
-        assertFalse("Cavalo não pode andar na diagonal", movimentos.contains(posicaoInvalida));
+        assertFalse("Cavalo não pode andar na diagonal)", movimentos.contains(new Posicao(5, 5)));
+        
+        assertFalse("Cavalo não pode andar apenas na vertical)", movimentos.contains(new Posicao(3, 4)));
+        
+        assertFalse("Cavalo não pode andar apenas na horizontal)", movimentos.contains(new Posicao(4, 3)));
+
     }
 
     /**
