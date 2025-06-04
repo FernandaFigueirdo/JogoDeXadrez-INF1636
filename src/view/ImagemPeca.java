@@ -26,7 +26,7 @@ public class ImagemPeca {
             imagens.put("TORRE_BRANCO", carregar("/imagens/CyanR.png"));
             imagens.put("TORRE_PRETO", carregar("/imagens/PurpleR.png"));
         } catch (IOException e) {
-            System.err.println("Erro ao carregar imagens das peças: " + e.getMessage());
+            System.err.println("Problema ao carregar imagens das peças: " + e.getMessage());
         }
     }
 

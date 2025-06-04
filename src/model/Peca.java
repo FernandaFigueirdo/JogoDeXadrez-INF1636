@@ -30,6 +30,16 @@ abstract class Peca{
 		return coluna;
 	}
 	
+	protected boolean movido = false;
+	
+	public boolean jaMovimentou() {
+		return movido;
+	}
+	
+	public void moveu() {
+		this.movido = true;
+	}
+	
 	// Atualiza a posição da peça
 	public void setPosicao(int posLinha,int posColuna) {
 		this.linha=posLinha;

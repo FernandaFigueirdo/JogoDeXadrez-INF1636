@@ -8,9 +8,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import javax.swing.JOptionPane;
+
 
 import model.JogoAPI;
 import model.MovimentoDTO;
+import model.ResultadoJogo;
 import view.ImagemPeca;
 
 public class TabuleiroCanvas extends Canvas implements MouseListener {
@@ -36,9 +39,9 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
         for (int linha = 0; linha < 8; linha++) {
             for (int coluna = 0; coluna < 8; coluna++) {
                 if ((linha + coluna) % 2 == 0) {
-                    g2.setColor(new Color(222, 184, 135));
+                    g2.setColor(new Color(240, 240, 240));
                 } else {
-                    g2.setColor(new Color(139, 69, 19));
+                    g2.setColor(new Color(30, 30, 30));
                 }
                 g2.fillRect(coluna * TAM_CASA, linha * TAM_CASA, TAM_CASA, TAM_CASA);
             }
@@ -76,8 +79,20 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
                 movimentosPossiveis = jogo.getMovimentosPossiveisSelecionada();
             }
         } else {
-            jogo.selecionaCasa(linha, coluna);
+        	boolean moveu = jogo.selecionaCasa(linha, coluna);
             movimentosPossiveis = null;
+            if (moveu) {
+                ResultadoJogo status = jogo.verificarFimDeJogo(); 
+                if (status == ResultadoJogo.XEQUE_MATE_BRANCO) {
+                    JOptionPane.showMessageDialog(this, "Xeque-mate! Vitória das peças BRANCAS!");
+                } else if (status == ResultadoJogo.XEQUE_MATE_PRETO) {
+                    JOptionPane.showMessageDialog(this, "Xeque-mate! Vitória das peças PRETAS!");
+                } else if (status == ResultadoJogo.CONGELAMENTO) {
+                    JOptionPane.showMessageDialog(this, "Empate por congelamento!");
+                } else if (jogo.estaEmXeque(jogo.getTabuleiro(), jogo.getJogadorAtual())) {
+                    JOptionPane.showMessageDialog(this, "Atenção! Seu rei está em xeque!");
+                }
+            }
         }
 
         repaint();

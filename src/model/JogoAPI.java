@@ -33,6 +33,16 @@ public class JogoAPI {
         return tabuleiro;
     }
     
+    public String getTipoPeca(int linha, int coluna) {
+        Peca peca = tabuleiro.getPeca(linha, coluna);
+        return (peca != null) ? peca.getClass().getSimpleName().toUpperCase() : null;
+    }
+
+    public String getCorPeca(int linha, int coluna) {
+        Peca peca = tabuleiro.getPeca(linha, coluna);
+        return (peca != null) ? peca.getCor().name() : null;
+    }
+    
  // Retorna os movimentos possíveis da peça selecionada
     public List<MovimentoDTO> getMovimentosPossiveisSelecionada() {
         if (pecaSelecionada == null) return null;
@@ -91,6 +101,33 @@ public class JogoAPI {
             tabuleiro.removePeca(pecaSelecionada.getLinha(), pecaSelecionada.getColuna());
             tabuleiro.colocaPeca(pecaSelecionada, linha, coluna);
             
+            pecaSelecionada.moveu();
+
+            // Verifica se foi Roque (rei se movendo para col 6 ou 2)
+            if (pecaSelecionada instanceof Rei) {
+            	if (coluna == 6) { // Roque curto
+            		Peca torre = tabuleiro.getPeca(linha, 7);
+            		tabuleiro.removePeca(linha, 7);
+            		tabuleiro.colocaPeca(torre, linha, 5);
+            		torre.moveu();
+            	}else if (coluna == 2) { // Roque longo
+            		Peca torre = tabuleiro.getPeca(linha, 0);
+            		tabuleiro.removePeca(linha, 0);
+            		tabuleiro.colocaPeca(torre, linha, 3);
+            		torre.moveu();
+            	}
+            }
+            
+            // Verifica se é peão e se chegou ao fim do tabuleiro
+            if (pecaSelecionada instanceof Peao) {
+                int fim = (pecaSelecionada.getCor() == Cor.BRANCO) ? 0 : 7;
+                if (linha == fim) {
+                    // Por enquanto, promoção automática para rainha
+                    promocaoPeao(linha, coluna, "RAINHA");
+                }
+            }
+
+            
             // Troca o turno e limpa a peça selecionada
             alternarJogador();
             pecaSelecionada = null;
@@ -103,17 +140,17 @@ public class JogoAPI {
     }
     
     // Verifica se o jogador da cor especificada está em xeque
-    public boolean estaEmXeque(Cor cor) {
-        Posicao posRei = localizarRei(cor);
+    public boolean estaEmXeque(Tabuleiro tabuleiroSimulado, Cor cor) {
+        Posicao posRei = localizarRei(tabuleiroSimulado, cor);
 
-        if (posRei == null) return false; 
+        if (posRei == null) return false;
 
-        // Percorre todas as peças do adversário e vê se alguma ameaça o rei
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                Peca peca = tabuleiro.getPeca(i, j);
+                Peca peca = tabuleiroSimulado.getPeca(i, j);
                 if (peca != null && peca.getCor() != cor) {
-                    List<Posicao> movimentos = peca.getMovimentosPossiveis(tabuleiro);
+                	if (peca instanceof Rei) continue;
+                    List<Posicao> movimentos = peca.getMovimentosPossiveis(tabuleiroSimulado);
                     if (movimentos.contains(posRei)) {
                         return true;
                     }
@@ -124,8 +161,104 @@ public class JogoAPI {
         return false;
     }
     
+    public boolean estaEmXeque(Cor cor) {
+        return estaEmXeque(this.tabuleiro, cor);
+    }
+
+    
+    public boolean estaEmXequeMate(Cor cor) {
+        if (!estaEmXeque(tabuleiro, cor)) {
+            return false; // Se não está em xeque, não pode ser xeque-mate
+        }
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Peca p = tabuleiro.getPeca(i, j);
+                if (p != null && p.getCor() == cor) {
+                    List<Posicao> movimentos = p.getMovimentosPossiveis(tabuleiro);
+                    if (movimentos == null || movimentos.isEmpty()) continue;
+
+                    for (Posicao destino : movimentos) {
+                        Tabuleiro simulado = tabuleiro.clonar();
+                        Peca simulada = simulado.getPeca(i, j);
+                        if (simulada == null) continue;
+
+                        simulado.removePeca(i, j);
+                        simulado.colocaPeca(simulada, destino.getLinha(), destino.getColuna());
+
+                        if (!estaEmXeque(simulado, cor)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+    
+    public boolean estaCongelado(Cor cor) {
+        if (estaEmXeque(tabuleiro, cor)) {
+            return false; // Não é congelamento se está em xeque (aí pode ser xeque-mate)
+        }
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                Peca p = tabuleiro.getPeca(i, j);
+                if (p != null && p.getCor() == cor) {
+                    List<Posicao> movimentos = p.getMovimentosPossiveis(tabuleiro);
+                    if (movimentos == null || movimentos.isEmpty()) continue;
+
+                    for (Posicao destino : movimentos) {
+                        Tabuleiro simulado = tabuleiro.clonar();
+                        Peca simulada = simulado.getPeca(i, j);
+                        if (simulada == null) continue;
+
+                        simulado.removePeca(i, j);
+                        simulado.colocaPeca(simulada, destino.getLinha(), destino.getColuna());
+
+                        if (!estaEmXeque(simulado, cor)) {
+                            return false; // Tem pelo menos uma jogada válida
+                        }
+                    }
+                }
+            }
+        }
+
+        return true; // Nenhuma jogada válida sem entrar em xeque → congelamento
+    }
+
+
+
+
+    
+    public void promocaoPeao(int linha, int coluna, String tipoNovaPeca) {
+        Peca peca = tabuleiro.getPeca(linha, coluna);
+
+        if (peca instanceof Peao) {
+            Cor cor = peca.getCor();
+            switch (tipoNovaPeca.toUpperCase()) {
+                case "RAINHA":
+                    tabuleiro.colocaPeca(new Rainha(cor, linha, coluna),linha, coluna);
+                    break;
+                case "TORRE":
+                    tabuleiro.colocaPeca(new Torre(cor, linha, coluna),linha, coluna);
+                    break;
+                case "BISPO":
+                    tabuleiro.colocaPeca(new Bispo(cor, linha, coluna),linha, coluna);
+                    break;
+                case "CAVALO":
+                    tabuleiro.colocaPeca(new Cavalo(cor, linha, coluna),linha, coluna);
+                    break;
+                default:
+                    System.out.println("Tipo de peça inválido para promoção.");
+            }
+        }
+    }
+
+    
     // Busca a posição do rei de determinada cor
-    private Posicao localizarRei(Cor cor) {
+    private Posicao localizarRei(Tabuleiro tabuleiro, Cor cor) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 Peca peca = tabuleiro.getPeca(i, j);
@@ -136,43 +269,56 @@ public class JogoAPI {
         }
         return null;
     }
+    
+    public ResultadoJogo verificarFimDeJogo() {
+        if (estaEmXequeMate(jogadorAtual)) {
+            return (jogadorAtual == Cor.BRANCO) ? ResultadoJogo.XEQUE_MATE_PRETO : ResultadoJogo.XEQUE_MATE_BRANCO;
+        }
+        if (estaCongelado(jogadorAtual)) {
+            return ResultadoJogo.CONGELAMENTO;
+        }
+        return ResultadoJogo.EM_ANDAMENTO;
+    }
+
+    
+    public void reiniciarJogo() {
+        tabuleiro = new Tabuleiro();
+        inicializarPecas();
+        capturadasBrancas.clear();
+        capturadasPretas.clear();
+        jogadorAtual = Cor.BRANCO;
+        pecaSelecionada = null;
+    }
+
 
     // Imprime o estado atual do tabuleiro e peças capturadas
-    public void imprimirTabuleiro() {
-        for (int i = 0; i < 8; i++) {
-            System.out.print((8 - i) + " ");
-            for (int j = 0; j < 8; j++) {
-                Casa casa = tabuleiro.getCasa(i, j);
-                System.out.print(casa + " ");
-            }
-            System.out.println();
-        }
-        System.out.println("   a  b  c  d  e  f  g  h");
+    //public void imprimirTabuleiro() {
+        //for (int i = 0; i < 8; i++) {
+            //System.out.print((8 - i) + " ");
+            //for (int j = 0; j < 8; j++) {
+                //Casa casa = tabuleiro.getCasa(i, j);
+                //System.out.print(casa + " ");
+            //}
+            //System.out.println();
+        //}
+        //System.out.println("   a  b  c  d  e  f  g  h");
 
-        System.out.print("Capturadas Brancas: ");
-        for (Peca p : capturadasBrancas) System.out.print(p + " ");
-        System.out.println();
+        //System.out.print("Capturadas Brancas: ");
+        //for (Peca p : capturadasBrancas) System.out.print(p + " ");
+        //System.out.println();
 
-        System.out.print("Capturadas Pretas: ");
-        for (Peca p : capturadasPretas) System.out.print(p + " ");
-        System.out.println();
+        //System.out.print("Capturadas Pretas: ");
+        //for (Peca p : capturadasPretas) System.out.print(p + " ");
+        //System.out.println();
 
-        System.out.println("Vez de: " + (jogadorAtual == Cor.BRANCO ? "BRANCO" : "PRETO"));
+        //System.out.println("Vez de: " + (jogadorAtual == Cor.BRANCO ? "BRANCO" : "PRETO"));
         
-        if (estaEmXeque(jogadorAtual)) {
-            System.out.println("XEQUE no jogador " + jogadorAtual);
-        }
-    }
+        //if (estaEmXeque(jogadorAtual)) {
+            //System.out.println("XEQUE no jogador " + jogadorAtual);
+        //}
+    //}
     
-    public String getTipoPeca(int linha, int coluna) {
-        Peca peca = tabuleiro.getPeca(linha, coluna);
-        return (peca != null) ? peca.getClass().getSimpleName().toUpperCase() : null;
-    }
 
-    public String getCorPeca(int linha, int coluna) {
-        Peca peca = tabuleiro.getPeca(linha, coluna);
-        return (peca != null) ? peca.getCor().name() : null;
-    }
 
     // Inicializa todas as peças nas suas posições padrão no início do jogo
     private void inicializarPecas() {

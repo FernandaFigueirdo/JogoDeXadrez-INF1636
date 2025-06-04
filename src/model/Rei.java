@@ -100,6 +100,52 @@ class Rei extends Peca {
                 movimentos.add(new Posicao(linha, coluna));
             }
         }
+        
+     // Verificar possibilidade de roque
+        if (!this.jaMovimentou() && !JogoAPI.getInstancia().estaEmXeque(tabuleiro, this.getCor())) {
+            linha = getLinha();
+
+            // Roque curto
+            Peca torreDireita = tabuleiro.getPeca(linha, 7);
+            if (torreDireita instanceof Torre && !torreDireita.jaMovimentou()) {
+                if (tabuleiro.getPeca(linha, 5) == null && tabuleiro.getPeca(linha, 6) == null) {
+                    // Simula rei em f1 (coluna 5) e g1 (coluna 6)
+                    boolean seguro = true;
+                    for (int c : new int[] {5, 6}) {
+                        Tabuleiro copia = tabuleiro.clonar(); 
+                        copia.removePeca(getLinha(), getColuna());
+                        copia.colocaPeca(new Rei(getCor(), linha, c), linha, c);
+                        if (JogoAPI.getInstancia().estaEmXeque(copia, getCor())) {
+                            seguro = false;
+                            break;
+                        }
+                    }
+                    if (seguro) movimentos.add(new Posicao(linha, 6));
+                }
+            }
+
+            // Roque longo
+            Peca torreEsquerda = tabuleiro.getPeca(linha, 0);
+            if (torreEsquerda instanceof Torre && !torreEsquerda.jaMovimentou()) {
+                if (tabuleiro.getPeca(linha, 1) == null &&
+                    tabuleiro.getPeca(linha, 2) == null &&
+                    tabuleiro.getPeca(linha, 3) == null) {
+                    // Simula rei passando por d1 (col 3) e c1 (col 2)
+                    boolean seguro = true;
+                    for (int c : new int[] {3, 2}) {
+                        Tabuleiro copia = tabuleiro.clonar();
+                        copia.removePeca(getLinha(), getColuna());
+                        copia.colocaPeca(new Rei(getCor(), linha, c), linha, c);
+                        if (JogoAPI.getInstancia().estaEmXeque(copia, getCor())) {
+                            seguro = false;
+                            break;
+                        }
+                    }
+                    if (seguro) movimentos.add(new Posicao(linha, 2));
+                }
+            }
+        }
+
 
         // Retorna todos os movimentos possíveis válidos
         return movimentos;
