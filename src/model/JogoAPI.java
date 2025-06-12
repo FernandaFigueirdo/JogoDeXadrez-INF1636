@@ -2,9 +2,31 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
+import observer.Observado;
+import observer.Observador;
+
 
 //Classe que representa a API do jogo de xadrez, usando padrão Singleton
-public class JogoAPI {
+public class JogoAPI implements Observado {
+	 private final List<Observador> observadores = new ArrayList<>();
+
+	    @Override
+	    public void registrarObservador(Observador o) {
+	        observadores.add(o);
+	    }
+
+	    @Override
+	    public void removerObservador(Observador o) {
+	        observadores.remove(o);
+	    }
+
+	    @Override
+	    public void notificarObservadores() {
+	        for (Observador obs : observadores) {
+	            obs.atualizar();
+	        }
+	    }
+
     private static JogoAPI instancia; // instância única do jogo (Singleton)
 
     private Tabuleiro tabuleiro; // representa o tabuleiro de xadrez
@@ -56,12 +78,13 @@ public class JogoAPI {
 
         return lista;
     }
-
-
+    
     // Retorna o jogador atual (quem deve jogar)
     public Cor getJogadorAtual() {
         return jogadorAtual;
     }
+    
+  
 
     // Alterna o jogador após um movimento válido
     public void alternarJogador() {
@@ -131,6 +154,7 @@ public class JogoAPI {
             // Troca o turno e limpa a peça selecionada
             alternarJogador();
             pecaSelecionada = null;
+            notificarObservadores();
             return true;
         } 
 
@@ -288,6 +312,7 @@ public class JogoAPI {
         capturadasPretas.clear();
         jogadorAtual = Cor.BRANCO;
         pecaSelecionada = null;
+        notificarObservadores();
     }
 
 
