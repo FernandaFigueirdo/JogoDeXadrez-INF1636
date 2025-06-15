@@ -15,17 +15,14 @@ import model.JogoAPI;
 import model.MovimentoDTO;
 import model.ResultadoJogo;
 import view.ImagemPeca;
-import observer.Observador;
 
-
-public class TabuleiroCanvas extends Canvas implements MouseListener, Observador {
+public class TabuleiroCanvas extends Canvas implements MouseListener {
     private static final int TAM_CASA = 80;
     private final JogoAPI jogo;
     private List<MovimentoDTO> movimentosPossiveis;
 
     public TabuleiroCanvas() {
         this.jogo = JogoAPI.getInstancia();
-        this.jogo.registrarObservador(this);
         this.addMouseListener(this);
         this.setSize(640, 640);
     }
@@ -107,10 +104,5 @@ public class TabuleiroCanvas extends Canvas implements MouseListener, Observador
     public void mouseEntered(MouseEvent e) {}
     public void mouseExited(MouseEvent e) {} 
     
-    @Override
-    public void atualizar() {
-    	System.out.println("[DEBUG] View foi notificada pelo modelo.");
-        repaint(); 
-    }
 
 }
