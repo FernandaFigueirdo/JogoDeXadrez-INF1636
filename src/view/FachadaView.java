@@ -17,10 +17,6 @@ public class FachadaView implements Observador {
         this.canvas = new TabuleiroCanvas();
         this.frame = new Frame("Jogo de Xadrez");
         
-        if (arquivoCarregado != null) {
-            JogoAPI.getInstancia().carregarEstadoDeArquivo(arquivoCarregado);
-        }
-
         frame.add(canvas);
         frame.setSize(652, 675);
         frame.setResizable(false);
@@ -34,6 +30,10 @@ public class FachadaView implements Observador {
         });
 
         api.registrarObservador(this);
+        if (arquivoCarregado != null) {
+            JogoAPI.getInstancia().carregarEstadoDeArquivo(arquivoCarregado);
+        }
+
     }
     
     public FachadaView() {

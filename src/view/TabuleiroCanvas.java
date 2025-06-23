@@ -33,10 +33,14 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
 
     @Override
     public void paint(Graphics g) {
-        Graphics2D g2 = (Graphics2D) g;
+    	BufferedImage offscreen = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_ARGB);
+    	Graphics2D g2 = offscreen.createGraphics();
         desenharTabuleiro(g2);
         desenharPecas(g2);
         destacarMovimentos(g2);
+        
+        g.drawImage(offscreen, 0, 0, null);
+        g2.dispose();
     }
 
     private void desenharTabuleiro(Graphics2D g2) {
@@ -124,6 +128,11 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
         repaint();
     }
     
+    @Override
+    public void update(Graphics g) {
+        paint(g); 
+    }
+
 
     public void mousePressed(MouseEvent e) {}
     public void mouseReleased(MouseEvent e) {}
