@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.Canvas;
+import controller.MenuInicial;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -9,6 +10,8 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 
 import model.JogoAPI;
@@ -20,6 +23,7 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
     private static final int TAM_CASA = 80;
     private final JogoAPI jogo;
     private List<MovimentoDTO> movimentosPossiveis;
+    
 
     public TabuleiroCanvas() {
         this.jogo = JogoAPI.getInstancia();
@@ -67,6 +71,7 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
             }
         }
     }
+    
 
     @Override
     public void mouseClicked(MouseEvent e) {
@@ -83,17 +88,38 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
             movimentosPossiveis = null;
             if (moveu) {
                 ResultadoJogo status = jogo.verificarFimDeJogo(); 
-                if (status == ResultadoJogo.XEQUE_MATE_BRANCO) {
-                    JOptionPane.showMessageDialog(this, "Xeque-mate! Vitória das peças BRANCAS!");
-                } else if (status == ResultadoJogo.XEQUE_MATE_PRETO) {
-                    JOptionPane.showMessageDialog(this, "Xeque-mate! Vitória das peças PRETAS!");
-                } else if (status == ResultadoJogo.CONGELAMENTO) {
-                    JOptionPane.showMessageDialog(this, "Empate por congelamento!");
-                } else if (jogo.estaEmXeque(jogo.getTabuleiro(), jogo.getJogadorAtual())) {
-                    JOptionPane.showMessageDialog(this, "Atenção! Seu rei está em xeque!");
+                if (status != ResultadoJogo.EM_ANDAMENTO) {
+                    String msg = switch (status) {
+                        case XEQUE_MATE_BRANCO -> "Xeque-mate! Vitória das peças BRANCAS!";
+                        case XEQUE_MATE_PRETO -> "Xeque-mate! Vitória das peças PRETAS!";
+                        case CONGELAMENTO -> "Empate por congelamento!";
+                        default -> "";
+                    };
+                    JOptionPane.showMessageDialog(this, msg);
+
+                    ((java.awt.Window) this.getParent().getParent()).dispose();
+                    controller.MenuInicial.mostrarMenu();
                 }
             }
         }
+        if (e.getButton() == MouseEvent.BUTTON3) {
+            JPopupMenu popup = new JPopupMenu();
+
+            JMenuItem salvarItem = new JMenuItem("Salvar Jogo");
+            salvarItem.addActionListener(ev -> jogo.salvarEstadoComJFileChooser());
+
+            JMenuItem encerrarItem = new JMenuItem("Encerrar Jogo");
+            encerrarItem.addActionListener(ev -> {
+                JOptionPane.showMessageDialog(this, "Partida encerrada.");
+                System.exit(0);
+            });
+
+            popup.add(salvarItem);
+            popup.add(encerrarItem);
+            popup.show(this, e.getX(), e.getY());
+            return;
+        }
+
 
         repaint();
     }
