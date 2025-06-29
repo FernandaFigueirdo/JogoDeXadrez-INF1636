@@ -4,6 +4,8 @@ import model.JogoAPI;
 import observer.Observador;
 import java.awt.Frame;
 import java.io.*;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
 
 
 public class FachadaView implements Observador {
@@ -31,7 +33,7 @@ public class FachadaView implements Observador {
 
         api.registrarObservador(this);
         if (arquivoCarregado != null) {
-            JogoAPI.getInstancia().carregarEstadoDeArquivo(arquivoCarregado);
+        	controller.Controller.carregarPartidaDeArquivo(arquivoCarregado);
         }
 
     }
@@ -44,14 +46,37 @@ public class FachadaView implements Observador {
     public void atualizar() {
     	System.out.println("View foi notificada pelo modelo.");
         canvas.repaint();
+        if (JogoAPI.getInstancia().temPromocaoPendente()) {
+            mostrarMenuPromocao();
+        }
     }
     
     public void salvarEstado() {
-        api.salvarEstadoComJFileChooser();
+    	controller.Controller.salvarPartida();
     }
 
     public void carregarEstado() {
-        api.carregarEstadoComJFileChooser();
+    	controller.Controller.carregarPartida();
     }
+    
+    private void mostrarMenuPromocao() {
+        JPopupMenu menu = new JPopupMenu();
+        String[] opcoes = {"Rainha", "Torre", "Bispo", "Cavalo"};
+
+        for (String tipo : opcoes) {
+            JMenuItem item = new JMenuItem(tipo);
+            item.addActionListener(e -> JogoAPI.getInstancia().aplicarPromocao(tipo.toUpperCase()));
+            menu.add(item);
+        }
+
+        int linha = JogoAPI.getInstancia().getLinhaPromocao();
+        int coluna = JogoAPI.getInstancia().getColunaPromocao();
+
+        int x = coluna * 80;
+        int y = linha * 80;
+
+        menu.show(canvas, x, y);
+    }
+
 
 }

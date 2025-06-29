@@ -4,13 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import observer.Observado;
 import observer.Observador;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import java.io.File;
-import java.io.FileReader;
-import java.io.PrintWriter;
-import java.io.BufferedReader;
-import java.io.IOException;
+
 
 
 
@@ -73,19 +67,53 @@ public class JogoAPI implements Observado {
         return (peca != null) ? peca.getCor().name() : null;
     }
     
+    private int linhaPromocao = -1;
+    private int colunaPromocao = -1;
+    private boolean promocaoPendente = false;
+
+    public boolean temPromocaoPendente() {
+        return promocaoPendente;
+    }
+
+    public int getLinhaPromocao() {
+        return linhaPromocao;
+    }
+
+    public int getColunaPromocao() {
+        return colunaPromocao;
+    }
+
  // Retorna os movimentos possíveis da peça selecionada
     public List<MovimentoDTO> getMovimentosPossiveisSelecionada() {
         if (pecaSelecionada == null) return null;
 
-        List<Posicao> movimentos = pecaSelecionada.getMovimentosPossiveis(tabuleiro);
-        List<MovimentoDTO> lista = new ArrayList<>();
+        List<Posicao> brutos = pecaSelecionada.getMovimentosPossiveis(tabuleiro);
+        List<MovimentoDTO> validos = new ArrayList<>();
 
-        for (Posicao p : movimentos) {
-            lista.add(new MovimentoDTO(p.getLinha(), p.getColuna()));
+        for (Posicao destino : brutos) {
+            // Cria uma cópia do tabuleiro
+            Tabuleiro simulado = tabuleiro.clonar();
+
+            // Pega a mesma peça na cópia
+            Peca simulada = simulado.getPeca(pecaSelecionada.getLinha(), pecaSelecionada.getColuna());
+
+            // Simula o movimento
+            simulado.removePeca(simulada.getLinha(), simulada.getColuna());
+            simulado.colocaPeca(simulada, destino.getLinha(), destino.getColuna());
+
+            // Verifica se o movimento deixa o rei em xeque
+            if (!estaEmXeque(simulado, jogadorAtual)) {
+                validos.add(new MovimentoDTO(destino.getLinha(), destino.getColuna()));
+            }
+        }
+        
+        if (estaEmXeque(jogadorAtual)) {
+            System.out.println("Você está em xeque! Apenas movimentos que removem o xeque são permitidos.");
         }
 
-        return lista;
+        return validos;
     }
+
     
     // Retorna o jogador atual (quem deve jogar)
     public Cor getJogadorAtual() {
@@ -154,7 +182,12 @@ public class JogoAPI implements Observado {
                 int fim = (pecaSelecionada.getCor() == Cor.BRANCO) ? 0 : 7;
                 if (linha == fim) {
                     // Por enquanto, promoção automática para rainha
-                    promocaoPeao(linha, coluna, "RAINHA");
+                	linhaPromocao = linha;
+                	colunaPromocao = coluna;
+                	promocaoPendente = true;
+                	notificarObservadores(); // avisar view para abrir menu
+                	return true; // para parar aqui e esperar escolha
+
                 }
             }
 
@@ -170,6 +203,16 @@ public class JogoAPI implements Observado {
         pecaSelecionada = null;
         return false;
     }
+    
+    public void aplicarPromocao(String tipo) {
+        promocaoPeao(linhaPromocao, colunaPromocao, tipo);
+        promocaoPendente = false;
+        linhaPromocao = -1;
+        colunaPromocao = -1;
+        alternarJogador();
+        notificarObservadores();
+    }
+
     
     // Verifica se o jogador da cor especificada está em xeque
     public boolean estaEmXeque(Tabuleiro tabuleiroSimulado, Cor cor) {
@@ -325,78 +368,46 @@ public class JogoAPI implements Observado {
 
 
     
-    public void salvarEstadoComJFileChooser() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Arquivos de Texto (*.txt)", "txt"));
-        int resultado = chooser.showSaveDialog(null);
-
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            File arquivo = chooser.getSelectedFile();
-            if (!arquivo.getName().toLowerCase().endsWith(".txt")) {
-                arquivo = new File(arquivo.getAbsolutePath() + ".txt");
-            }
-            try (PrintWriter writer = new PrintWriter(arquivo)) {
-                for (int i = 0; i < 8; i++) {
-                    for (int j = 0; j < 8; j++) {
-                        String tipo = getTipoPeca(i, j);
-                        String cor = getCorPeca(i, j);
-                        if (tipo != null && cor != null) {
-                            writer.println(tipo + ";" + cor + ";" + i + ";" + j);
-                        }
-                    }
+    public String gerarEstadoTexto() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                String tipo = getTipoPeca(i, j);
+                String cor = getCorPeca(i, j);
+                if (tipo != null && cor != null) {
+                    sb.append(tipo).append(";").append(cor).append(";").append(i).append(";").append(j).append("\n");
                 }
-                writer.println("TURNO;" + (jogadorAtual == Cor.BRANCO ? "BRANCO" : "PRETO"));
-                JOptionPane.showMessageDialog(null, "Partida salva com sucesso!");
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Erro ao salvar partida.");
-                e.printStackTrace();
             }
         }
+        sb.append("TURNO;").append(jogadorAtual.name()).append("\n");
+        return sb.toString();
     }
 
+    public void carregarEstadoDeTexto(String conteudo) {
+        tabuleiro = new Tabuleiro();
+        pecaSelecionada = null;
+        capturadasBrancas.clear();
+        capturadasPretas.clear();
 
-    public void carregarEstadoComJFileChooser() {
-        JFileChooser chooser = new JFileChooser();
-        int resultado = chooser.showOpenDialog(null);
-
-        if (resultado == JFileChooser.APPROVE_OPTION) {
-            File arquivo = chooser.getSelectedFile();
-            tabuleiro = new Tabuleiro(); 
-            pecaSelecionada = null;
-            capturadasBrancas.clear();
-            capturadasPretas.clear();
-
-            try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
-                String linha;
-
-                while ((linha = reader.readLine()) != null) {
-                    if (linha.startsWith("TURNO")) {
-                        String[] partes = linha.split(";");
-                        jogadorAtual = partes[1].equals("BRANCO") ? Cor.BRANCO : Cor.PRETO;
-                    } else {
-                        String[] partes = linha.split(";");
-                        String tipo = partes[0];
-                        String cor = partes[1];
-                        int l = Integer.parseInt(partes[2]);
-                        int c = Integer.parseInt(partes[3]);
-
-                        Peca nova = criarPeca(tipo, cor.charAt(0), l, c);
-                        if (nova != null) {
-                            tabuleiro.colocaPeca(nova, l, c);
-                        } else {
-                            System.out.println("Erro ao criar peça: " + tipo + " " + cor);
-                        }
+        String[] linhas = conteudo.split("\\n");
+        for (String linha : linhas) {
+            if (linha.startsWith("TURNO")) {
+                jogadorAtual = linha.split(";")[1].equals("BRANCO") ? Cor.BRANCO : Cor.PRETO;
+            } else {
+                String[] partes = linha.split(";");
+                if (partes.length == 4) {
+                    Peca nova = criarPeca(partes[0], partes[1].charAt(0),
+                            Integer.parseInt(partes[2]), Integer.parseInt(partes[3]));
+                    if (nova != null) {
+                        tabuleiro.colocaPeca(nova, Integer.parseInt(partes[2]), Integer.parseInt(partes[3]));
                     }
                 }
-
-                JOptionPane.showMessageDialog(null, "Partida carregada com sucesso!");
-                notificarObservadores();
-            } catch (IOException e) {
-                JOptionPane.showMessageDialog(null, "Erro ao carregar partida.");
-                e.printStackTrace();
             }
         }
+
+        notificarObservadores();
     }
+
 
     
     public Peca criarPeca(String tipo, char corChar, int linha, int coluna) {
@@ -413,40 +424,6 @@ public class JogoAPI implements Observado {
         }
     }
     
-    public void carregarEstadoDeArquivo(File arquivo) {
-        try (BufferedReader reader = new BufferedReader(new FileReader(arquivo))) {
-            tabuleiro = new Tabuleiro();
-            pecaSelecionada = null;
-            capturadasBrancas.clear();
-            capturadasPretas.clear();
-
-            String linha;
-            while ((linha = reader.readLine()) != null) {
-                if (linha.startsWith("TURNO")) {
-                    String[] partes = linha.split(";");
-                    jogadorAtual = partes[1].equals("BRANCO") ? Cor.BRANCO : Cor.PRETO;
-                } else {
-                    String[] partes = linha.split(";");
-                    String tipo = partes[0];
-                    String cor = partes[1];
-                    int l = Integer.parseInt(partes[2]);
-                    int c = Integer.parseInt(partes[3]);
-
-                    Peca nova = criarPeca(tipo, cor.charAt(0), l, c);
-                    if (nova != null) {
-                        tabuleiro.colocaPeca(nova, l, c);
-                    }
-                }
-            }
-
-            notificarObservadores();
-            JOptionPane.showMessageDialog(null, "Partida carregada com sucesso!");
-        } catch (IOException e) {
-            JOptionPane.showMessageDialog(null, "Erro ao carregar partida.");
-            e.printStackTrace();
-        }
-    }
-
 
 
     // Inicializa todas as peças nas suas posições padrão no início do jogo

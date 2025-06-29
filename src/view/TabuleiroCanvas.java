@@ -110,12 +110,14 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
             JPopupMenu popup = new JPopupMenu();
 
             JMenuItem salvarItem = new JMenuItem("Salvar Jogo");
-            salvarItem.addActionListener(ev -> jogo.salvarEstadoComJFileChooser());
+            salvarItem.addActionListener(ev -> controller.Controller.salvarPartida()); 
 
             JMenuItem encerrarItem = new JMenuItem("Encerrar Jogo");
             encerrarItem.addActionListener(ev -> {
-                JOptionPane.showMessageDialog(this, "Partida encerrada.");
-                System.exit(0);
+            	JOptionPane.showMessageDialog(this, "Partida encerrada.");
+            	((java.awt.Window) this.getParent()).dispose(); // Fecha a janela do tabuleiro
+            	controller.MenuInicial.mostrarMenu(); // Mostra o menu inicial novamente
+
             });
 
             popup.add(salvarItem);
