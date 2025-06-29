@@ -115,6 +115,7 @@ public class TabuleiroCanvas extends Canvas implements MouseListener {
             JMenuItem encerrarItem = new JMenuItem("Encerrar Jogo");
             encerrarItem.addActionListener(ev -> {
             	JOptionPane.showMessageDialog(this, "Partida encerrada.");
+            	JogoAPI.getInstancia().reiniciarJogo();
             	((java.awt.Window) this.getParent()).dispose(); // Fecha a janela do tabuleiro
             	controller.MenuInicial.mostrarMenu(); // Mostra o menu inicial novamente
 

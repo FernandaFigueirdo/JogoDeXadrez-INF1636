@@ -1,0 +1,10 @@
+Nomes e Matrículas dos Integrantes do Grupo:
+- Fernanda da Cal Figueiredo — 2312090
+- Marcela Issa  — 2310746
+- Mariana Costa Ribeiro — 2311569
+
+Classe que contém o método main:
+- Main.java - está no controller
+
+
+

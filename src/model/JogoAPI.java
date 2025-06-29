@@ -5,9 +5,6 @@ import java.util.List;
 import observer.Observado;
 import observer.Observador;
 
-
-
-
 //Classe que representa a API do jogo de xadrez, usando padrão Singleton
 public class JogoAPI implements Observado {
 	 private final List<Observador> observadores = new ArrayList<>();
@@ -146,9 +143,10 @@ public class JogoAPI implements Observado {
 
         List<Posicao> movimentos = pecaSelecionada.getMovimentosPossiveis(tabuleiro);
         Posicao destino = new Posicao(linha, coluna);
+
+        // Verifica se o movimento está permitido (incluindo roque, já validado)
         if (movimentos.contains(destino)) {
             Peca alvo = tabuleiro.getPeca(linha, coluna);
-            // Se capturar uma peça, armazena na lista de capturadas
             if (alvo != null) {
                 if (alvo.getCor() == Cor.BRANCO)
                     capturadasBrancas.add(alvo);
@@ -156,25 +154,30 @@ public class JogoAPI implements Observado {
                     capturadasPretas.add(alvo);
             }
 
-            // Executa o movimento da peça
-            tabuleiro.removePeca(pecaSelecionada.getLinha(), pecaSelecionada.getColuna());
+            int origemLinha = pecaSelecionada.getLinha();
+            int origemColuna = pecaSelecionada.getColuna();
+
+            // Executa o movimento
+            tabuleiro.removePeca(origemLinha, origemColuna);
             tabuleiro.colocaPeca(pecaSelecionada, linha, coluna);
-            
             pecaSelecionada.moveu();
 
-            // Verifica se foi Roque (rei se movendo para col 6 ou 2)
+            // Detecta e executa roque, com base no movimento do rei
             if (pecaSelecionada instanceof Rei) {
-            	if (coluna == 6) { // Roque curto
-            		Peca torre = tabuleiro.getPeca(linha, 7);
-            		tabuleiro.removePeca(linha, 7);
-            		tabuleiro.colocaPeca(torre, linha, 5);
-            		torre.moveu();
-            	}else if (coluna == 2) { // Roque longo
-            		Peca torre = tabuleiro.getPeca(linha, 0);
-            		tabuleiro.removePeca(linha, 0);
-            		tabuleiro.colocaPeca(torre, linha, 3);
-            		torre.moveu();
-            	}
+                // Roque curto
+                if (coluna == 6 && origemColuna == 4) {
+                    Peca torre = tabuleiro.getPeca(linha, 7);
+                    tabuleiro.removePeca(linha, 7);
+                    tabuleiro.colocaPeca(torre, linha, 5);
+                    torre.moveu();
+                }
+                // Roque longo
+                else if (coluna == 2 && origemColuna == 4) {
+                    Peca torre = tabuleiro.getPeca(linha, 0);
+                    tabuleiro.removePeca(linha, 0);
+                    tabuleiro.colocaPeca(torre, linha, 3);
+                    torre.moveu();
+                }
             }
             
             // Verifica se é peão e se chegou ao fim do tabuleiro
@@ -194,6 +197,9 @@ public class JogoAPI implements Observado {
             
             // Troca o turno e limpa a peça selecionada
             alternarJogador();
+            if (estaEmXeque(jogadorAtual)) {
+                System.out.println("O jogador " + jogadorAtual + " está em xeque!");
+            }
             pecaSelecionada = null;
             notificarObservadores();
             return true;
